@@ -5,15 +5,15 @@ set YEARS;
 set REG_TIMES;
 set HAPPINESS;
 param numStudents;
-set STUDENTS := 1..numStudents;
-set TIMES;
+set STUDENTS := 0..(numStudents-1);
+set CLASS_TIMES;
 set SECTIONS{CLASSES};
 
 # params
 param seats{c in CLASSES, SECTIONS[c]};                                     # how many seats per section
 param req_prefs{STUDENTS, c in CLASSES, SECTIONS[c], HAPPINESS} binary;     # 1 iff a student lists the required class as a preference
 param elec_prefs{STUDENTS, c in CLASSES, SECTIONS[c], HAPPINESS} binary;    # 1 iff a student lists the elective class as a preference
-param class_times{c in CLASSES, SECTIONS[c], TIMES} binary;                 # 1 iff a class section is offered at the given time
+param class_times{c in CLASSES, SECTIONS[c], CLASS_TIMES} binary;           # 1 iff a class section is offered at the given time
 param interest_rates{HAPPINESS};                                            # the weight of each happiness
 
 # decision variables
@@ -31,7 +31,7 @@ subject to Unique_List_Choice{s in STUDENTS, c in CLASSES}:
     sum {n in SECTIONS[c]} x[s, c, n] <= 1;
 
 # cannot get 2 classes at the same time
-subject to No_Overlap_Constraint{s in STUDENTS, t in TIMES}:
+subject to No_Overlap_Constraint{s in STUDENTS, t in CLASS_TIMES}:
     (sum {c in CLASSES, n in SECTIONS[c]} (class_times[c, n, t] * x[s, c, n])) <= 1;
 
 # student gets into up to 1 class from required list
