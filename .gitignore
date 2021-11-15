@@ -1,5 +1,6 @@
 __pycache__/
 .DS_Store
 ampl-files/*.run
+ampl-files/*.dat
 python_scripts/*.dat
 *.csv

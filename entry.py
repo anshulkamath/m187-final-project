@@ -12,7 +12,7 @@ def get_times(inds):
     return [class_times[idx] for idx in inds]
 
 classes = [
-    Class('CS81', get_times([6, 7]), 30, 0.5),
+    Class('CS081', get_times([6, 7]), 30, 0.5),
     Class('CS105', get_times([2, 3]), 30, 0.5),
     Class('CS124', get_times([3, 4]), 20, 0.6),
     Class('CS131', get_times([1, 2]), 30, 0.5),
@@ -40,7 +40,7 @@ happiness = {
 }
 
 def generate_dat():
-    export_path = './ampl_files/case-study-2.dat'
+    export_path = './ampl-files/case-study-2.dat'
     num_students = 300
     exporter = Export(
         classes,
@@ -51,5 +51,5 @@ def generate_dat():
         class_times
     )
 
-    exporter.write_dat_file(export_path, np.random.choice(['CS', 'CSM'], num_students, p=[0.5, 0.5]), req_majors)
+    return exporter.write_dat_file(export_path, np.random.choice(['CS', 'CSM'], num_students, p=[0.5, 0.5]), req_majors)
 

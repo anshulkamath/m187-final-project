@@ -58,7 +58,7 @@ class Export():
             
             out.write(";\n\n")
 
-            self.write_student_data(out, majors, req_majors)
+            return self.write_student_data(out, majors, req_majors)
 
     def write_student_data(self, writer: TextIOWrapper, majors, req_majors):
         '''
@@ -103,3 +103,5 @@ class Export():
                     counter += 1
             writer.write(",\n")
         writer.write(";\n")
+        
+        return prefs
