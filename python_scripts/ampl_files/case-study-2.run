@@ -1,5 +1,0 @@
-reset;
-option solver './gurobi';
-model projects/case-study-2/python_scripts/ampl_files/case-study-2.mod;
-data projects/case-study-2/python_scripts/ampl_files/generated.dat;
-solve;
