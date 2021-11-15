@@ -1,7 +1,6 @@
 from io import TextIOWrapper
 from Student import Schedule
 from ClassManager import Class
-from input import *
 
 class Export():
     def __init__(self, classes: list[Class], years: list, reg_times: list, happiness: dict, num_students: int, class_times: list):
@@ -18,7 +17,7 @@ class Export():
         self.num_students = num_students
         self.class_times = class_times
 
-    def write_dat_file(self, path, majors, req_majors, prob_dist):
+    def write_dat_file(self, path, majors, req_majors):
         enumerate_list = lambda x : [str(i) for i in range(len(x))]
         with open(path, 'w+', newline='') as out:
             # write sets
@@ -59,9 +58,9 @@ class Export():
             
             out.write(";\n\n")
 
-            self.write_student_data(out, majors, req_majors, prob_dist)
+            self.write_student_data(out, majors, req_majors)
 
-    def write_student_data(self, writer: TextIOWrapper, majors, req_majors, prob_dist):
+    def write_student_data(self, writer: TextIOWrapper, majors, req_majors):
         '''
         write the req_prefs and elec_prefs using the given majors and requirements
         '''
@@ -72,7 +71,6 @@ class Export():
         )
 
         prefs = [sched_generator.generate_preference(maj)[0] for maj in majors]
-        print(prefs)
 
         writer.write("param req_prefs :=\n")
         for i, pref in enumerate(prefs):
@@ -105,14 +103,3 @@ class Export():
                     counter += 1
             writer.write(",\n")
         writer.write(";\n")
-            
-exporter = Export(
-    classes,
-    example_years,
-    example_reg_times,
-    example_happiness,
-    5,
-    example_class_times
-)
-
-exporter.write_dat_file('./example.dat', ['CS', 'CS', 'CSM', 'CSM', 'CS'], { 'CS': [classes[0]], 'CSM': [] }, [0.5, 0.5])

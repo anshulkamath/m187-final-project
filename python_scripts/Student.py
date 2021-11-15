@@ -2,7 +2,6 @@ import csv
 import numpy as np
 
 from ClassManager import Class
-from input import *
 
 class Schedule:
     classes = []
@@ -67,7 +66,7 @@ def generate_csv(num_lists, path, classes, req_classes, happiness):
     generates a csv with the given information that contains a list
     of preferences for the given number of students
     '''
-    schedule = Schedule(classes, req_classes, list(range(happiness)), prob_dist)
+    schedule = Schedule(classes, req_classes, list(range(happiness)))
     schedules = [schedule.generate_preference(np.random.choice(['CS', 'CSM'])) for _ in range(num_lists)]
 
     export_data(path, schedules)
