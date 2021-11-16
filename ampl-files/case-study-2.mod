@@ -44,7 +44,7 @@ subject to Selection_Constraint_1{s in STUDENTS}: (
 subject to Selection_Constraint_2{s in STUDENTS}: (
     sum {c in CLASSES, n in SECTIONS[c], h in HAPPINESS}
     (elec_prefs[s, c, n, h] * x[s, c, n])
-) <= 1;
+) <= 2;
 
 # students constrained by the number of seats in a section
 subject to Class_Size_Constraint{c in CLASSES, n in SECTIONS[c]}:
