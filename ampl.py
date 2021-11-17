@@ -62,42 +62,34 @@ def create_matrix(ampl_output, prefs):
         
 #         len(class_idx[0]) == 0?
         if len(class_idx[0]) == 1:  # assume it's an elective
-#             elect_happiness[curr_prefs[class_idx[0][0]]] += 1
             happiness[4,curr_prefs[class_idx[0][0]]] += 1
         elif len(class_idx[0]) == 2:  # assume 1 req and 2 elect preplacement, and req comes first in list
-            # INVALID! ex. CS124 and CS131
-#             req_happiness[curr_prefs[class_idx[0][0]]] += 1
-#             elect_happiness[curr_prefs[class_idx[0][1]]] += 1
             happiness[curr_prefs[class_idx[0][0]], curr_prefs[class_idx[0][1]]] += 1
 
-    # normalize the number of students --> a percentage
-#     req_happiness, elect_happiness = np.array(req_happiness), np.array(elect_happiness)
-#     print(np.sum(req_happiness), np.sum(elect_happiness))
-#     print(req_happiness, elect_happiness)
-#     req_happiness = req_happiness / np.sum(req_happiness)
-#     elect_happiness = elect_happiness / np.sum(elect_happiness)
-#     print(req_happiness, elect_happiness)
-#     return np.array(req_happiness).reshape((-1,1)) + np.array(elect_happiness).reshape((1,-1)) / 2
-    return happiness
+    return happiness / (len(ampl_output) / num_sections)
 
 
 
 def create_heatmap(data):
     data = np.flipud(data)
-    ax = sns.heatmap(data, cmap='BuPu', cbar_kws={'label': 'Number of Students'}, annot=True)
+#     ax = sns.heatmap(data, cmap='BuPu', cbar_kws={'label': 'Number of Students'}, annot=True)
+    ax = sns.heatmap(data, cmap='BuPu')
     plt.xlabel("Happiness with Required Class")
     plt.ylabel("Happiness with Elective Class")
     plt.xticks(np.arange(5)+0.5, ["NO", "OPEN", "INT", "YAY", "N/A"])
     plt.yticks(np.arange(5)+0.5, ["NO", "OPEN", "INT", "YAY", "N/A"][::-1])
     plt.show()
 
-for i in range(1):
+    
+trials = 5
+matrix = np.zeros((5,5))
+for i in range(trials):
     prefs = ent.generate_dat()
     
     solve_model()
 
     x_soln = ampl.getData('x;').toList()
-    df = create_df(x_soln, prefs)
+#     df = create_df(x_soln, prefs)
 #     df.to_html('output.html')
-    matrix = create_matrix(x_soln, prefs)
-    create_heatmap(matrix)
+    matrix += create_matrix(x_soln, prefs)
+create_heatmap(matrix / trials)
