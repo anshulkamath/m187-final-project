@@ -58,13 +58,14 @@ def create_matrix(ampl_output, prefs):
     for i in range(0, len(ampl_output), num_sections):
         student = ampl_output[i][0]
         curr_prefs = prefs[int(student)]['preferences']
-        class_idx = np.where(np.array(ampl_output[i:i+num_sections])[:,3] == '1.0')
+        class_idx = np.where(np.array(ampl_output[i:i+num_sections])[:,3] == '1.0')[0]
         
-#         len(class_idx[0]) == 0?
-        if len(class_idx[0]) == 1:  # assume it's an elective
-            happiness[4,curr_prefs[class_idx[0][0]]] += 1
-        elif len(class_idx[0]) == 2:  # assume 1 req and 2 elect preplacement, and req comes first in list
-            happiness[curr_prefs[class_idx[0][0]], curr_prefs[class_idx[0][1]]] += 1
+        if len(class_idx) == 0:
+            happiness[0,0] += 1
+        elif len(class_idx) == 1:  # assume it's an elective
+            happiness[0,curr_prefs[class_idx[0]] + 1] += 1
+        elif len(class_idx) == 2:  # assume 1 req and 2 elect preplacement, and req comes first in list
+            happiness[curr_prefs[class_idx[0]] + 1, curr_prefs[class_idx[1]] + 1] += 1
 
     return happiness / (len(ampl_output) / num_sections)
 
@@ -74,10 +75,10 @@ def create_heatmap(data):
     data = np.flipud(data)
 #     ax = sns.heatmap(data, cmap='BuPu', cbar_kws={'label': 'Number of Students'}, annot=True)
     ax = sns.heatmap(data, cmap='BuPu')
-    plt.xlabel("Happiness with Required Class")
-    plt.ylabel("Happiness with Elective Class")
-    plt.xticks(np.arange(5)+0.5, ["NO", "OPEN", "INT", "YAY", "N/A"])
-    plt.yticks(np.arange(5)+0.5, ["NO", "OPEN", "INT", "YAY", "N/A"][::-1])
+    plt.xlabel("Happiness with Elective Class")
+    plt.ylabel("Happiness with Required Class")
+    plt.xticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"])
+    plt.yticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"][::-1])
     plt.show()
 
     

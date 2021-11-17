@@ -22,7 +22,6 @@ class Schedule:
         self.happiness = happiness
 
     def generate_preference(self, major):
-        MAJOR_BOOST = 0.1
         SIGMA = 0.3  # standard deviation
         required: list[Class] = self.req_majors[major]
         header = [section for c in self.classes for section in c.get_sections()]
@@ -34,9 +33,8 @@ class Schedule:
         i = 0
         for c in self.classes:
             for _ in c.get_sections():
-                demand = c.get_demand()  # treat prob as mean
-#                 prefs[i] = np.random.choice(self.happiness) * np.random.choice([0, 1], p=[1 - prob, prob])
-                desire = min(max(round(np.random.normal(demand + MAJOR_BOOST*(c in required), SIGMA) * self.happiness[-1]), 0), self.happiness[-1])
+                demand = c.get_demand()
+                desire = min(max(np.random.normal(demand, SIGMA), 0), self.happiness[-1])
     
                 # bad code shh
                 if desire <= 0.8:
@@ -48,14 +46,6 @@ class Schedule:
                 else:
                     prefs[i] = 3
                 i += 1
-
-        # regenerate required classes for majors with small additional probability
-#         i = 0
-#         for c in required:
-#             for _ in c.get_sections():
-#                 prob = c.get_demand() + MAJOR_BOOST
-#                 prefs[i] = min(max(np.random.choice(self.happiness[1:]) * np.random.choice([0, 1], p=[1 - prob, prob]), 0), self.happiness[-1])
-#                 i += 1
 
         data['preferences'] = prefs
         

@@ -4,3 +4,8 @@ ampl-files/*.run
 ampl-files/*.dat
 python_scripts/*.dat
 *.csv
+.ipynb_checkpoints
+*.ipynb
+*.html
+*.cmd
+*env*

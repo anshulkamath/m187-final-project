@@ -3,7 +3,7 @@ from Student import Schedule
 from ClassManager import Class
 
 class Export():
-    def __init__(self, classes: list[Class], years: list, reg_times: list, happiness: dict, num_students: int, class_times: list):
+    def __init__(self, classes, years: list, reg_times: list, happiness: dict, num_students: int, class_times: list):
         '''
         majors: a list of majors
         classes: a dictionary where the key is a class and the value is a list of the class sections
