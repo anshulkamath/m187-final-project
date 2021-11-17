@@ -1,3 +1,4 @@
+from Student import Schedule
 from amplpy import AMPL, Environment
 import entry as ent
 from ClassManager import Class
@@ -82,13 +83,19 @@ def create_heatmap(data):
     plt.xticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"])
     plt.yticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"][::-1])
 
-def run_experiment(matrix = None, sensitivity = 0):
+def run_experiment(matrix = None, sensitivity = 0, sdev = 0.3):
     '''
     runs a single experiment, tabulating results in
     given matrix and using given sensitivity
     '''
-    old_sensitivity = Class.get_sensitivity()
-    Class.adjust_sensitivity(sensitivity)
+    # adjust params as necessary
+    if sensitivity:
+        old_sensitivity = Class.get_sensitivity()
+        Class.adjust_sensitivity(sensitivity)
+
+    if sdev:
+        old_sigma = Schedule.get_sigma()
+        Schedule.adjust_sigma(sdev)
 
     prefs = ent.generate_dat()
     solve_model()
@@ -97,30 +104,63 @@ def run_experiment(matrix = None, sensitivity = 0):
     if matrix is not None:
         matrix += create_matrix(x_soln, prefs)
     
-    Class.adjust_sensitivity(old_sensitivity)
+    # revert changes
+    if sensitivity:
+        Class.adjust_sensitivity(old_sensitivity)
+
+    if sdev:
+        Schedule.adjust_sigma(old_sigma)
 
     return x_soln
 
-def run_sensitivity_analysis(sensitivities, num_trials = 30):
+def run_sensitivity_analysis_1(sensitivities, num_trials = 30):
     ''' runs sensitivity analysis with the given params '''
+    directory = './images/sa1'
 
     if not os.path.exists('./images'):
         os.mkdir('./images')
+
+    if not os.path.exists(directory):
+        os.mkdir(directory)
     
     for sensitivity in sensitivities:
         print(f'Creating heatmap with sensitivity: {sensitivity}')
         plt.figure()
-        plt.title(f'Happiness vs Classes Heatmap with Sensitivity {sensitivity}')
+        plt.title(f'Happiness vs Classes Heatmap with Adjusted Demand {sensitivity}')
 
         matrix = np.zeros((5,5))
         for _ in range(num_trials):
-            run_experiment(matrix, sensitivity)
+            run_experiment(matrix, sensitivity = sensitivity)
         
         create_heatmap(matrix / num_trials)
         file_name = str(abs(sensitivity))
         file_name = ('neg_' if sensitivity < 0 else 'pos_') + file_name
 
-        plt.savefig(f'./images/heatmap_{file_name}.png')
+        plt.savefig(f'{directory}/heatmap_{file_name}.png')
 
-run_sensitivity_analysis((i / 5.0 for i in range(-5, 6)), 5)
-# run_experiment(sensitivity=1)
+def run_sensitivity_analysis_2(stdevs, num_trials = 30):
+    ''' runs sensitivity analysis with the given params '''
+    directory = './images/sa2'
+
+    if not os.path.exists('./images'):
+        os.mkdir('./images')
+
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+    
+    for stdev in stdevs:
+        print(f'Creating heatmap with standard deviation: {stdev}')
+        plt.figure()
+        plt.title(f'Happiness vs Classes Heatmap with Standard Deviation {stdev}')
+
+        matrix = np.zeros((5,5))
+        for _ in range(num_trials):
+            run_experiment(matrix, sdev = stdev)
+        
+        create_heatmap(matrix / num_trials)
+        file_name = str(stdev)
+
+        plt.savefig(f'{directory}/heatmap_{file_name}.png')
+
+run_sensitivity_analysis_1((i / 5.0 for i in range(-5, 6)))
+run_sensitivity_analysis_2((0.5, 0.4, 0.3, 0.2, 0.1, 0.05), 30)

@@ -1,9 +1,8 @@
 import csv
 import numpy as np
 
-from ClassManager import Class
-
 class Schedule:
+    _SIGMA = 0.3
     classes = []
     req_majors = {}
     happiness = []
@@ -20,10 +19,18 @@ class Schedule:
         self.classes = classes
         self.req_majors = req_majors
         self.happiness = happiness
+        Schedule._SIGMA = 0.3
+
+    def adjust_sigma(new_sigma):
+        ''' adjusts the standard deviation to the new value '''
+        Schedule._SIGMA = new_sigma
+
+    def get_sigma():
+        ''' returns the current standard deviation '''
+        return Schedule._SIGMA
 
     def generate_preference(self, major):
-        SIGMA = 0.3  # standard deviation
-        required: list[Class] = self.req_majors[major]
+        ''' generates an object of preferences for a student using the classes initialized with the schedule '''
         header = [section for c in self.classes for section in c.get_sections()]
 
         data = { 'major': major }
@@ -34,7 +41,7 @@ class Schedule:
         for c in self.classes:
             for _ in c.get_sections():
                 demand = c.get_demand()
-                desire = min(max(np.random.normal(demand, SIGMA), 0), self.happiness[-1])
+                desire = min(max(np.random.normal(demand, Schedule._SIGMA), 0), self.happiness[-1])
     
                 # bad code shh
                 if desire <= 0.8:

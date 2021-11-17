@@ -34,7 +34,7 @@ class Class():
 
     def get_demand(self):
         ''' returns the demand of the class '''
-        return self.demand - Class._sens_analy
+        return self.demand + Class._sens_analy
 
     def get_sensitivity():
         ''' returns the sensitivity analysis '''
