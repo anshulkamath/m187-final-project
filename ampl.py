@@ -1,6 +1,8 @@
 from amplpy import AMPL, Environment
 import entry as ent
+from ClassManager import Class
 import numpy as np
+import os
 from pandas.core.frame import DataFrame
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -9,19 +11,22 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # setup
-ampl = AMPL(Environment('../ampl_mswin64/ampl_mswin64/'))
-ampl.setOption('solver', '../ampl_mswin64/ampl_mswin64/gurobi')
+ampl = AMPL(Environment(os.environ.get('AMPL_PATH')))
+ampl.setOption('solver', os.environ.get('SOLVER_PATH'))
 ampl.setOption('solver_msg', 0)
-ampl.setOption('outlev', 0)
+print()
 
 def solve_model():
     ''' runs the model '''
     ampl.reset()
     ampl.read('ampl-files/case-study-2.mod')
     ampl.readData('ampl-files/case-study-2.dat')
-#     ampl.eval('solve >/dev/null;')
-    ampl.solve()
-    
+
+    if os.path.exists('/dev/null'):
+        ampl.eval('solve >/dev/null;')
+        return
+
+    ampl.eval('solve >NUL;')
     
 def create_df(ampl_output, prefs):
     df_dict = {}
@@ -69,28 +74,53 @@ def create_matrix(ampl_output, prefs):
 
     return happiness / (len(ampl_output) / num_sections)
 
-
-
 def create_heatmap(data):
     data = np.flipud(data)
-#     ax = sns.heatmap(data, cmap='BuPu', cbar_kws={'label': 'Number of Students'}, annot=True)
-    ax = sns.heatmap(data, cmap='BuPu')
+    sns.heatmap(data, cmap='rocket_r', vmin=0, vmax=1.0)
     plt.xlabel("Happiness with Elective Class")
     plt.ylabel("Happiness with Required Class")
     plt.xticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"])
     plt.yticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"][::-1])
-    plt.show()
 
-    
-trials = 5
-matrix = np.zeros((5,5))
-for i in range(trials):
+def run_experiment(matrix = None, sensitivity = 0):
+    '''
+    runs a single experiment, tabulating results in
+    given matrix and using given sensitivity
+    '''
+    old_sensitivity = Class.get_sensitivity()
+    Class.adjust_sensitivity(sensitivity)
+
     prefs = ent.generate_dat()
-    
     solve_model()
-
     x_soln = ampl.getData('x;').toList()
-#     df = create_df(x_soln, prefs)
-#     df.to_html('output.html')
-    matrix += create_matrix(x_soln, prefs)
-create_heatmap(matrix / trials)
+
+    if matrix is not None:
+        matrix += create_matrix(x_soln, prefs)
+    
+    Class.adjust_sensitivity(old_sensitivity)
+
+    return x_soln
+
+def run_sensitivity_analysis(sensitivities, num_trials = 30):
+    ''' runs sensitivity analysis with the given params '''
+
+    if not os.path.exists('./images'):
+        os.mkdir('./images')
+    
+    for sensitivity in sensitivities:
+        print(f'Creating heatmap with sensitivity: {sensitivity}')
+        plt.figure()
+        plt.title(f'Happiness vs Classes Heatmap with Sensitivity {sensitivity}')
+
+        matrix = np.zeros((5,5))
+        for _ in range(num_trials):
+            run_experiment(matrix, sensitivity)
+        
+        create_heatmap(matrix / num_trials)
+        file_name = str(abs(sensitivity))
+        file_name = ('neg_' if sensitivity < 0 else 'pos_') + file_name
+
+        plt.savefig(f'./images/heatmap_{file_name}.png')
+
+run_sensitivity_analysis((i / 5.0 for i in range(-5, 6)), 5)
+# run_experiment(sensitivity=1)

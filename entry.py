@@ -14,16 +14,16 @@ def get_times(inds):
     return [class_times[idx] for idx in inds]
 
 classes = [
-    Class('CS081', get_times([6, 7]), 30, 0.9 + sa1),
-    Class('CS105', get_times([2, 3]), 30, 1.5 + sa1),
-    Class('CS131', get_times([1, 2]), 30, 1.5 + sa1),
-    Class('CS140', get_times([3, 4]), 30, 1.6 + sa1),
-    Class('CS124', get_times([3, 4]), 20, 1.9 + sa1),
-    Class('CS151', get_times([1]), 20, 1.1 + sa1),
-    Class('CS153', get_times([9, 10]), 20, 0.9 + sa1),
-    Class('CS159', get_times([1]), 20, 1.6 + sa1),
-    Class('CS181AA', get_times([9]), 20, 0.6 + sa1),
-    Class('CS181AB', get_times([9, 10]), 20, 0.7 + sa1),
+    Class('CS081', get_times([6, 7]), 30, 0.9),
+    Class('CS105', get_times([2, 3]), 30, 1.5),
+    Class('CS131', get_times([1, 2]), 30, 1.5),
+    Class('CS140', get_times([3, 4]), 30, 1.6),
+    Class('CS124', get_times([3, 4]), 20, 1.9),
+    Class('CS151', get_times([1]), 20, 1.1),
+    Class('CS153', get_times([9, 10]), 20, 0.9),
+    Class('CS159', get_times([1]), 20, 1.6),
+    Class('CS181AA', get_times([9]), 20, 0.6),
+    Class('CS181AB', get_times([9, 10]), 20, 0.7),
 ]
 
 req_majors = {

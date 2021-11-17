@@ -9,3 +9,6 @@ python_scripts/*.dat
 *.html
 *.cmd
 *env*
+*.bat
+*.sh
+images/
