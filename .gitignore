@@ -1,7 +1,7 @@
 __pycache__/
 .DS_Store
-ampl-files/*.run
-ampl-files/*.dat
+*/*.run
+*/*.dat
 python_scripts/*.dat
 *.csv
 .ipynb_checkpoints
