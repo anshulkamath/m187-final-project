@@ -11,4 +11,4 @@ python_scripts/*.dat
 *env*
 *.bat
 *.sh
-images/
+*images/

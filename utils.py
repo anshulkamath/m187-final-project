@@ -2,8 +2,7 @@ import numpy as np
 from classes.Exporter import Exporter
 from constants import *
 
-def generate_dat(export_path):
-    num_students = 300
+def generate_dat(export_path, num_students=210):
     exporter = Exporter(
         classes,
         years,
