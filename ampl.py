@@ -1,6 +1,9 @@
+from Student import Schedule
 from amplpy import AMPL, Environment
 import entry as ent
+from ClassManager import Class
 import numpy as np
+import os
 from pandas.core.frame import DataFrame
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -9,19 +12,22 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 # setup
-ampl = AMPL(Environment('../ampl_mswin64/ampl_mswin64/'))
-ampl.setOption('solver', '../ampl_mswin64/ampl_mswin64/gurobi')
+ampl = AMPL(Environment(os.environ.get('AMPL_PATH')))
+ampl.setOption('solver', os.environ.get('SOLVER_PATH'))
 ampl.setOption('solver_msg', 0)
-ampl.setOption('outlev', 0)
+print()
 
 def solve_model():
     ''' runs the model '''
     ampl.reset()
     ampl.read('ampl-files/case-study-2.mod')
     ampl.readData('ampl-files/case-study-2.dat')
-#     ampl.eval('solve >/dev/null;')
-    ampl.solve()
-    
+
+    if os.path.exists('/dev/null'):
+        ampl.eval('solve >/dev/null;')
+        return
+
+    ampl.eval('solve >NUL;')
     
 def create_df(ampl_output, prefs):
     df_dict = {}
@@ -58,46 +64,103 @@ def create_matrix(ampl_output, prefs):
     for i in range(0, len(ampl_output), num_sections):
         student = ampl_output[i][0]
         curr_prefs = prefs[int(student)]['preferences']
-        class_idx = np.where(np.array(ampl_output[i:i+num_sections])[:,3] == '1.0')
+        class_idx = np.where(np.array(ampl_output[i:i+num_sections])[:,3] == '1.0')[0]
         
-#         len(class_idx[0]) == 0?
-        if len(class_idx[0]) == 1:  # assume it's an elective
-#             elect_happiness[curr_prefs[class_idx[0][0]]] += 1
-            happiness[4,curr_prefs[class_idx[0][0]]] += 1
-        elif len(class_idx[0]) == 2:  # assume 1 req and 2 elect preplacement, and req comes first in list
-            # INVALID! ex. CS124 and CS131
-#             req_happiness[curr_prefs[class_idx[0][0]]] += 1
-#             elect_happiness[curr_prefs[class_idx[0][1]]] += 1
-            happiness[curr_prefs[class_idx[0][0]], curr_prefs[class_idx[0][1]]] += 1
+        if len(class_idx) == 0:
+            happiness[0,0] += 1
+        elif len(class_idx) == 1:  # assume it's an elective
+            happiness[0,curr_prefs[class_idx[0]] + 1] += 1
+        elif len(class_idx) == 2:  # assume 1 req and 2 elect preplacement, and req comes first in list
+            happiness[curr_prefs[class_idx[0]] + 1, curr_prefs[class_idx[1]] + 1] += 1
 
-    # normalize the number of students --> a percentage
-#     req_happiness, elect_happiness = np.array(req_happiness), np.array(elect_happiness)
-#     print(np.sum(req_happiness), np.sum(elect_happiness))
-#     print(req_happiness, elect_happiness)
-#     req_happiness = req_happiness / np.sum(req_happiness)
-#     elect_happiness = elect_happiness / np.sum(elect_happiness)
-#     print(req_happiness, elect_happiness)
-#     return np.array(req_happiness).reshape((-1,1)) + np.array(elect_happiness).reshape((1,-1)) / 2
-    return happiness
-
-
+    return happiness / (len(ampl_output) / num_sections)
 
 def create_heatmap(data):
     data = np.flipud(data)
-    ax = sns.heatmap(data, cmap='BuPu', cbar_kws={'label': 'Number of Students'}, annot=True)
-    plt.xlabel("Happiness with Required Class")
-    plt.ylabel("Happiness with Elective Class")
-    plt.xticks(np.arange(5)+0.5, ["NO", "OPEN", "INT", "YAY", "N/A"])
-    plt.yticks(np.arange(5)+0.5, ["NO", "OPEN", "INT", "YAY", "N/A"][::-1])
-    plt.show()
+    sns.heatmap(data, cmap='rocket_r', vmin=0, vmax=1.0)
+    plt.xlabel("Happiness with Elective Class")
+    plt.ylabel("Happiness with Required Class")
+    plt.xticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"])
+    plt.yticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"][::-1])
 
-for i in range(1):
+def run_experiment(matrix = None, sensitivity = 0, sdev = 0.3):
+    '''
+    runs a single experiment, tabulating results in
+    given matrix and using given sensitivity
+    '''
+    # adjust params as necessary
+    if sensitivity:
+        old_sensitivity = Class.get_sensitivity()
+        Class.adjust_sensitivity(sensitivity)
+
+    if sdev:
+        old_sigma = Schedule.get_sigma()
+        Schedule.adjust_sigma(sdev)
+
     prefs = ent.generate_dat()
-    
     solve_model()
-
     x_soln = ampl.getData('x;').toList()
-    df = create_df(x_soln, prefs)
-#     df.to_html('output.html')
-    matrix = create_matrix(x_soln, prefs)
-    create_heatmap(matrix)
+
+    if matrix is not None:
+        matrix += create_matrix(x_soln, prefs)
+    
+    # revert changes
+    if sensitivity:
+        Class.adjust_sensitivity(old_sensitivity)
+
+    if sdev:
+        Schedule.adjust_sigma(old_sigma)
+
+    return x_soln
+
+def run_sensitivity_analysis_1(sensitivities, num_trials = 30):
+    ''' runs sensitivity analysis with the given params '''
+    directory = './images/sa1'
+
+    if not os.path.exists('./images'):
+        os.mkdir('./images')
+
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+    
+    for sensitivity in sensitivities:
+        print(f'Creating heatmap with sensitivity: {sensitivity}')
+        plt.figure()
+        plt.title(f'Happiness vs Classes Heatmap with Adjusted Demand {sensitivity}')
+
+        matrix = np.zeros((5,5))
+        for _ in range(num_trials):
+            run_experiment(matrix, sensitivity = sensitivity)
+        
+        create_heatmap(matrix / num_trials)
+        file_name = str(abs(sensitivity))
+        file_name = ('neg_' if sensitivity < 0 else 'pos_') + file_name
+
+        plt.savefig(f'{directory}/heatmap_{file_name}.png')
+
+def run_sensitivity_analysis_2(stdevs, num_trials = 30):
+    ''' runs sensitivity analysis with the given params '''
+    directory = './images/sa2'
+
+    if not os.path.exists('./images'):
+        os.mkdir('./images')
+
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+    
+    for stdev in stdevs:
+        print(f'Creating heatmap with standard deviation: {stdev}')
+        plt.figure()
+        plt.title(f'Happiness vs Classes Heatmap with Standard Deviation {stdev}')
+
+        matrix = np.zeros((5,5))
+        for _ in range(num_trials):
+            run_experiment(matrix, sdev = stdev)
+        
+        create_heatmap(matrix / num_trials)
+        file_name = str(stdev)
+
+        plt.savefig(f'{directory}/heatmap_{file_name}.png')
+
+run_sensitivity_analysis_1((i / 5.0 for i in range(-5, 6)))
+run_sensitivity_analysis_2((0.5, 0.4, 0.3, 0.2, 0.1, 0.05), 30)

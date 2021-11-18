@@ -3,6 +3,8 @@ from ClassManager import Class
 from Export import Export
 import numpy as np
 
+sa1 = -3
+
 class_times = [
     '8:00AM MW', '9:35AM MW', '11:10AM MW', '1:20PM MW', '2:55PM MW', '4:30PM MW',
     '8:00AM TR', '9:35AM TR', '11:10AM TR', '1:20PM TR', '2:55PM TR', '4:30PM TR' # 6
@@ -12,16 +14,16 @@ def get_times(inds):
     return [class_times[idx] for idx in inds]
 
 classes = [
-    Class('CS081', get_times([6, 7]), 30, 0.5),
-    Class('CS105', get_times([2, 3]), 30, 0.5),
-    Class('CS124', get_times([3, 4]), 20, 0.6),
-    Class('CS131', get_times([1, 2]), 30, 0.5),
-    Class('CS140', get_times([3, 4]), 30, 0.5),
-    Class('CS151', get_times([1]), 20, 0.5),
-    Class('CS153', get_times([9, 10]), 20, 0.5),
-    Class('CS159', get_times([1]), 20, 0.5),
-    Class('CS181AA', get_times([9]), 20, 0.5),
-    Class('CS181AB', get_times([9, 10]), 20, 0.5),
+    Class('CS081', get_times([6, 7]), 30, 0.9),
+    Class('CS105', get_times([2, 3]), 30, 1.5),
+    Class('CS131', get_times([1, 2]), 30, 1.5),
+    Class('CS140', get_times([3, 4]), 30, 1.6),
+    Class('CS124', get_times([3, 4]), 20, 1.9),
+    Class('CS151', get_times([1]), 20, 1.1),
+    Class('CS153', get_times([9, 10]), 20, 0.9),
+    Class('CS159', get_times([1]), 20, 1.6),
+    Class('CS181AA', get_times([9]), 20, 0.6),
+    Class('CS181AB', get_times([9, 10]), 20, 0.7),
 ]
 
 req_majors = {
