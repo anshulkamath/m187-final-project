@@ -64,7 +64,7 @@ def create_heatmap(data):
     plt.xticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"])
     plt.yticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"][::-1])
 
-def run_experiment(matrix = None, sensitivity = 0, sdev = 0.3):
+def run_experiment(mod_path, matrix = None, sensitivity = 0, sdev = 0.3):
     '''
     runs a single experiment, tabulating results in
     given matrix and using given sensitivity
@@ -78,8 +78,8 @@ def run_experiment(matrix = None, sensitivity = 0, sdev = 0.3):
         old_sigma = Schedule.get_sigma()
         Schedule.adjust_sigma(sdev)
 
-    prefs = utils.generate_dat()
-    x_soln = solve_model()
+    prefs = utils.generate_dat(mod_path)
+    x_soln = solve_model(mod_path)
 
     if matrix is not None:
         matrix += create_matrix(x_soln, prefs)
@@ -93,7 +93,7 @@ def run_experiment(matrix = None, sensitivity = 0, sdev = 0.3):
 
     return x_soln
 
-def run_sensitivity_analysis_1(sensitivities, num_trials = 30):
+def run_sensitivity_analysis_1(mod_path, sensitivities, num_trials = 30):
     ''' runs sensitivity analysis with the given params '''
     directory = './images/sa1'
 
@@ -110,7 +110,7 @@ def run_sensitivity_analysis_1(sensitivities, num_trials = 30):
 
         matrix = np.zeros((5,5))
         for _ in range(num_trials):
-            run_experiment(matrix, sensitivity = sensitivity)
+            run_experiment(mod_path, matrix, sensitivity = sensitivity)
         
         create_heatmap(matrix / num_trials)
         file_name = str(abs(sensitivity))
@@ -118,7 +118,7 @@ def run_sensitivity_analysis_1(sensitivities, num_trials = 30):
 
         plt.savefig(f'{directory}/heatmap_{file_name}.png')
 
-def run_sensitivity_analysis_2(stdevs, num_trials = 30):
+def run_sensitivity_analysis_2(mod_path, stdevs, num_trials = 30):
     ''' runs sensitivity analysis with the given params '''
     directory = './images/sa2'
 
@@ -135,7 +135,7 @@ def run_sensitivity_analysis_2(stdevs, num_trials = 30):
 
         matrix = np.zeros((5,5))
         for _ in range(num_trials):
-            run_experiment(matrix, sdev = stdev)
+            run_experiment(mod_path, matrix, sdev = stdev)
         
         create_heatmap(matrix / num_trials)
         file_name = str(stdev)

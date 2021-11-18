@@ -16,7 +16,7 @@ class Exporter():
         self.num_students = num_students
         self.class_times = class_times
 
-    def write_dat_file(self, path, majors, req_majors):
+    def write_dat_file(self, path, majors, req_majors, use_reg_times=False):
         enumerate_list = lambda x : [str(i) for i in range(len(x))]
         with open(path, 'w+', newline='') as out:
             # write sets
