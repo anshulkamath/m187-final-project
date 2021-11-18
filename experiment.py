@@ -64,7 +64,7 @@ def create_heatmap(data):
     plt.xticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"])
     plt.yticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"][::-1])
 
-def run_experiment(mod_path, matrix = None, sensitivity = 0, sdev = 0.3):
+def run_experiment(mod_path, matrix = None, sensitivity = 0, sdev = 0.3, num_students = 210):
     '''
     runs a single experiment, tabulating results in
     given matrix and using given sensitivity
@@ -78,7 +78,7 @@ def run_experiment(mod_path, matrix = None, sensitivity = 0, sdev = 0.3):
         old_sigma = Schedule.get_sigma()
         Schedule.adjust_sigma(sdev)
 
-    prefs = utils.generate_dat(mod_path)
+    prefs = utils.generate_dat(mod_path, num_students=num_students)
     x_soln = solve_model(mod_path)
 
     if matrix is not None:
@@ -93,20 +93,24 @@ def run_experiment(mod_path, matrix = None, sensitivity = 0, sdev = 0.3):
 
     return x_soln
 
-def run_sensitivity_analysis_1(mod_path, sensitivities, num_trials = 30):
+def check_dir(path):
+    subdirs = path.split('/')
+
+    for i in range(2, len(subdirs)):
+        curr_dir = '/'.join(subdirs[:i + 1])
+        if not os.path.exists(curr_dir):
+            os.mkdir(curr_dir)
+
+def run_sensitivity_analysis_1(dir, mod_path, sensitivities, num_trials = 30):
     ''' runs sensitivity analysis with the given params '''
-    directory = './images/sa1'
+    directory = f'./{dir}/sa1'
 
-    if not os.path.exists('./images'):
-        os.mkdir('./images')
-
-    if not os.path.exists(directory):
-        os.mkdir(directory)
+    check_dir(directory)
     
     for sensitivity in sensitivities:
         print(f'Creating heatmap with sensitivity: {sensitivity}')
         plt.figure()
-        plt.title(f'Happiness vs Classes Heatmap with Adjusted Demand {sensitivity}')
+        # plt.title(f'Happiness vs Classes Heatmap with Adjusted Demand {sensitivity}')
 
         matrix = np.zeros((5,5))
         for _ in range(num_trials):
@@ -118,20 +122,16 @@ def run_sensitivity_analysis_1(mod_path, sensitivities, num_trials = 30):
 
         plt.savefig(f'{directory}/heatmap_{file_name}.png')
 
-def run_sensitivity_analysis_2(mod_path, stdevs, num_trials = 30):
+def run_sensitivity_analysis_2(dir, mod_path, stdevs, num_trials = 30):
     ''' runs sensitivity analysis with the given params '''
-    directory = './images/sa2'
+    directory = f'./{dir}/sa2'
 
-    if not os.path.exists('./images'):
-        os.mkdir('./images')
-
-    if not os.path.exists(directory):
-        os.mkdir(directory)
+    check_dir(directory)
     
     for stdev in stdevs:
         print(f'Creating heatmap with standard deviation: {stdev}')
         plt.figure()
-        plt.title(f'Happiness vs Classes Heatmap with Standard Deviation {stdev}')
+        # plt.title(f'Happiness vs Classes Heatmap with Standard Deviation {stdev}')
 
         matrix = np.zeros((5,5))
         for _ in range(num_trials):
@@ -139,5 +139,25 @@ def run_sensitivity_analysis_2(mod_path, stdevs, num_trials = 30):
         
         create_heatmap(matrix / num_trials)
         file_name = str(stdev)
+
+        plt.savefig(f'{directory}/heatmap_{file_name}.png')
+
+def run_sensitivity_analysis_3(dir, mod_path, num_students, num_trials = 30):
+    ''' runs sensitivity analysis with the given params '''
+    directory = f'./{dir}/sa3'
+
+    check_dir(directory)
+    
+    for students in num_students:
+        print(f'Creating heatmap with {students} students')
+        plt.figure()
+        # plt.title(f'Happiness vs Classes Heatmap with Standard Deviation {students}')
+
+        matrix = np.zeros((5,5))
+        for _ in range(num_trials):
+            run_experiment(mod_path, matrix, num_students = students)
+        
+        create_heatmap(matrix / num_trials)
+        file_name = str(students)
 
         plt.savefig(f'{directory}/heatmap_{file_name}.png')
