@@ -1,8 +1,7 @@
 from io import TextIOWrapper
-from Student import Schedule
-from ClassManager import Class
+from classes.Student import Schedule
 
-class Export():
+class Exporter():
     def __init__(self, classes, years: list, reg_times: list, happiness: dict, num_students: int, class_times: list):
         '''
         majors: a list of majors
