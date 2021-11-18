@@ -1,6 +1,9 @@
 ''' file that contains the input information for the schedule generator '''
 import experiment as exp
 import argparse
+import numpy as np
+
+np.random.seed = 1
 
 parser = argparse.ArgumentParser()
 parser.add_argument('dir', help='the directory to use for all subsequent importing/exporting')
