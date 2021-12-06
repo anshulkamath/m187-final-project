@@ -2,7 +2,7 @@ import numpy as np
 from classes.Exporter import Exporter
 from constants import *
 
-def generate_dat(export_path, num_students=210):
+def generate_dat(export_path, num_students=210, lamb=0):
     exporter = Exporter(
         classes,
         years,
@@ -12,4 +12,4 @@ def generate_dat(export_path, num_students=210):
         class_times
     )
 
-    return exporter.write_dat_file(f'{export_path}/case-study-2.dat', np.random.choice(['CS', 'CSM'], num_students, p=[0.5, 0.5]), req_majors)
+    return exporter.write_dat_file(f'{export_path}/case-study-2.dat', np.random.choice(['CS', 'CSM'], num_students, p=[0.5, 0.5]), req_majors, lamb)

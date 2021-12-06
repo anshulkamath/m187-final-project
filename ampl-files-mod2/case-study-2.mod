@@ -15,15 +15,18 @@ param req_prefs{STUDENTS, c in CLASSES, SECTIONS[c], HAPPINESS} binary;     # 1 
 param elec_prefs{STUDENTS, c in CLASSES, SECTIONS[c], HAPPINESS} binary;    # 1 iff a student lists the elective class as a preference
 param class_times{c in CLASSES, SECTIONS[c], CLASS_TIMES} binary;           # 1 iff a class section is offered at the given time
 param interest_rates{HAPPINESS};                                            # the weight of each happiness
+param lambda;                                                               # relative weight of method (not used for this model)
 
 # decision variables
 var x {STUDENTS, c in CLASSES, SECTIONS[c]} binary;
+var minHappiness;
 
 # objective function
-maximize Happiness: (
-    sum { s in STUDENTS, c in CLASSES, n in SECTIONS[c], h in HAPPINESS }
-    ((elec_prefs[s, c, n, h] + s / numStudents) * interest_rates[h] * x[s, c, n])
-);
+maximize Happiness: minHappiness;
+
+# minimum happiness for any student
+subject to Min_Happiness{s in STUDENTS}:
+    minHappiness <= (sum{h in HAPPINESS, c in CLASSES, n in SECTIONS[c]} ((elec_prefs[s, c, n, h]) * interest_rates[h] * x[s, c, n]));
 
 # cannot get same class/section in both lists
 subject to Unique_List_Choice{s in STUDENTS, c in CLASSES}:

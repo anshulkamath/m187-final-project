@@ -16,7 +16,7 @@ class Exporter():
         self.num_students = num_students
         self.class_times = class_times
 
-    def write_dat_file(self, path, majors, req_majors):
+    def write_dat_file(self, path, majors, req_majors, lamb):
         enumerate_list = lambda x : [str(i) for i in range(len(x))]
         with open(path, 'w+', newline='') as out:
             # write sets
@@ -35,6 +35,7 @@ class Exporter():
             # write params
             out.write(f"param numStudents := {self.num_students};\n")
             out.write(f"param interest_rates := {' '.join([' '.join([key, str(self.happiness[key])]) for key in self.happiness])};\n\n")
+            out.write(f"param lambda := {lamb};\n")
 
             # write class seat lists
             out.write("param seats :=")
