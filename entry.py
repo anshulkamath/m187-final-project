@@ -11,15 +11,15 @@ parser.add_argument('dir', help='the directory to use for all subsequent importi
 args = parser.parse_args()
 mod_path = f'./ampl-files-{args.dir}'
 
-if args.dir == 'mod2':
+if args.dir == 'mod1':
     folder = 'sum_images'
     lambdas = [0] # dummy variable - is not used in model
 
-elif args.dir == 'mod3':
+elif args.dir == 'mod2':
     folder = 'maximin_images'
     lambdas = [0] # dummy variable - is not used in model
 
-elif args.dir == 'mod4':
+elif args.dir == 'mod3':
     folder = 'combined_images'
     lambdas = [0, 0.25, 0.5, 0.75, 1]
 

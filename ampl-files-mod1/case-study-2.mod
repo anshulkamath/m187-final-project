@@ -21,10 +21,9 @@ param lambda;                                                               # re
 var x {STUDENTS, c in CLASSES, SECTIONS[c]} binary;
 
 # objective function
-# what if req_prefs and elec_prefs are both 1 --> double counting
 maximize Happiness: (
     sum { s in STUDENTS, c in CLASSES, n in SECTIONS[c], h in HAPPINESS }
-    ((req_prefs[s, c, n, h] + elec_prefs[s, c, n, h]) * interest_rates[h] * x[s, c, n])
+    ((elec_prefs[s, c, n, h] * interest_rates[h] + s / numStudents) * x[s, c, n])
 );
 
 # cannot get same class/section in both lists
@@ -35,17 +34,17 @@ subject to Unique_List_Choice{s in STUDENTS, c in CLASSES}:
 subject to No_Overlap_Constraint{s in STUDENTS, t in CLASS_TIMES}:
     (sum {c in CLASSES, n in SECTIONS[c]} (class_times[c, n, t] * x[s, c, n])) <= 1;
 
-# student gets into up to 1 class from required list
+# student gets into up to 2 classes
 subject to Selection_Constraint_1{s in STUDENTS}: (
-    sum {c in CLASSES, n in SECTIONS[c], h in HAPPINESS}
-    (req_prefs[s, c, n, h] * x[s, c, n])
-) <= 1;
-
-# student gets into up to 1 class from elective list
-subject to Selection_Constraint_2{s in STUDENTS}: (
     sum {c in CLASSES, n in SECTIONS[c], h in HAPPINESS}
     (elec_prefs[s, c, n, h] * x[s, c, n])
 ) <= 2;
+
+# student gets into only one elective
+subject to Selection_Constraint_2{s in STUDENTS}: (
+    sum {c in CLASSES, n in SECTIONS[c], h in HAPPINESS}
+    (1 - req_prefs[s, c, n, h]) * elec_prefs[s, c, n, h] * x[s, c, n]
+) <= 1;
 
 # students constrained by the number of seats in a section
 subject to Class_Size_Constraint{c in CLASSES, n in SECTIONS[c]}:
