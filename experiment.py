@@ -64,7 +64,7 @@ def create_heatmap(data):
     plt.xticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"])
     plt.yticks(np.arange(5)+0.5, ["N/A", "NO", "OPEN", "INT", "YAY"][::-1])
 
-def run_experiment(mod_path, matrix = None, sensitivity = 0, sdev = 0.3, num_students = 210):
+def run_experiment(mod_path, matrix = None, sensitivity = 0, sdev = 0.3, num_students = 210, lamb=0):
     '''
     runs a single experiment, tabulating results in
     given matrix and using given sensitivity
@@ -78,7 +78,7 @@ def run_experiment(mod_path, matrix = None, sensitivity = 0, sdev = 0.3, num_stu
         old_sigma = Schedule.get_sigma()
         Schedule.adjust_sigma(sdev)
 
-    prefs = utils.generate_dat(mod_path, num_students=num_students)
+    prefs = utils.generate_dat(mod_path, num_students=num_students, lamb=lamb)
     x_soln = solve_model(mod_path)
 
     if matrix is not None:
@@ -96,12 +96,12 @@ def run_experiment(mod_path, matrix = None, sensitivity = 0, sdev = 0.3, num_stu
 def check_dir(path):
     subdirs = path.split('/')
 
-    for i in range(2, len(subdirs)):
-        curr_dir = '/'.join(subdirs[:i + 1])
+    for i in range(1, len(subdirs)):
+        curr_dir = '/'.join(subdirs[:i+1])
         if not os.path.exists(curr_dir):
             os.mkdir(curr_dir)
 
-def run_sensitivity_analysis_1(dir, mod_path, sensitivities, num_trials = 30):
+def run_sensitivity_analysis_1(dir, mod_path, sensitivities, num_trials = 30, lamb=0):
     ''' runs sensitivity analysis with the given params '''
     directory = f'./{dir}/sa1'
 
@@ -110,19 +110,19 @@ def run_sensitivity_analysis_1(dir, mod_path, sensitivities, num_trials = 30):
     for sensitivity in sensitivities:
         print(f'Creating heatmap with sensitivity: {sensitivity}')
         plt.figure()
-        # plt.title(f'Happiness vs Classes Heatmap with Adjusted Demand {sensitivity}')
 
         matrix = np.zeros((5,5))
         for _ in range(num_trials):
-            run_experiment(mod_path, matrix, sensitivity = sensitivity)
+            run_experiment(mod_path, matrix, sensitivity = sensitivity, lamb = lamb)
         
         create_heatmap(matrix / num_trials)
         file_name = str(abs(sensitivity))
         file_name = ('neg_' if sensitivity < 0 else 'pos_') + file_name
 
         plt.savefig(f'{directory}/heatmap_{file_name}.png')
+        plt.close()
 
-def run_sensitivity_analysis_2(dir, mod_path, stdevs, num_trials = 30):
+def run_sensitivity_analysis_2(dir, mod_path, stdevs, num_trials = 30, lamb=0):
     ''' runs sensitivity analysis with the given params '''
     directory = f'./{dir}/sa2'
 
@@ -131,18 +131,19 @@ def run_sensitivity_analysis_2(dir, mod_path, stdevs, num_trials = 30):
     for stdev in stdevs:
         print(f'Creating heatmap with standard deviation: {stdev}')
         plt.figure()
-        # plt.title(f'Happiness vs Classes Heatmap with Standard Deviation {stdev}')
 
         matrix = np.zeros((5,5))
         for _ in range(num_trials):
-            run_experiment(mod_path, matrix, sdev = stdev)
+            run_experiment(mod_path, matrix, sdev = stdev, lamb=lamb)
         
         create_heatmap(matrix / num_trials)
         file_name = str(stdev)
 
         plt.savefig(f'{directory}/heatmap_{file_name}.png')
+        plt.close()
 
-def run_sensitivity_analysis_3(dir, mod_path, num_students, num_trials = 30):
+
+def run_sensitivity_analysis_3(dir, mod_path, num_students, num_trials = 30, lamb=0):
     ''' runs sensitivity analysis with the given params '''
     directory = f'./{dir}/sa3'
 
@@ -151,13 +152,13 @@ def run_sensitivity_analysis_3(dir, mod_path, num_students, num_trials = 30):
     for students in num_students:
         print(f'Creating heatmap with {students} students')
         plt.figure()
-        # plt.title(f'Happiness vs Classes Heatmap with Standard Deviation {students}')
 
         matrix = np.zeros((5,5))
         for _ in range(num_trials):
-            run_experiment(mod_path, matrix, num_students = students)
+            run_experiment(mod_path, matrix, num_students=students, lamb=lamb)
         
         create_heatmap(matrix / num_trials)
         file_name = str(students)
 
         plt.savefig(f'{directory}/heatmap_{file_name}.png')
+        plt.close()

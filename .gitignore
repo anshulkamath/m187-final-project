@@ -12,3 +12,4 @@ python_scripts/*.dat
 *.bat
 *.sh
 *images/
+*.png

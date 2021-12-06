@@ -15,6 +15,7 @@ param req_prefs{STUDENTS, c in CLASSES, SECTIONS[c], HAPPINESS} binary;     # 1 
 param elec_prefs{STUDENTS, c in CLASSES, SECTIONS[c], HAPPINESS} binary;    # 1 iff a student lists the elective class as a preference
 param class_times{c in CLASSES, SECTIONS[c], CLASS_TIMES} binary;           # 1 iff a class section is offered at the given time
 param interest_rates{HAPPINESS};                                            # the weight of each happiness
+param lambda;                                                               # relative weight of method (not used for this model)
 
 # decision variables
 var x {STUDENTS, c in CLASSES, SECTIONS[c]} binary;
