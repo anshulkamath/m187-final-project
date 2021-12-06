@@ -23,7 +23,7 @@ var x {STUDENTS, c in CLASSES, SECTIONS[c]} binary;
 # objective function
 maximize Happiness: (
     sum { s in STUDENTS, c in CLASSES, n in SECTIONS[c], h in HAPPINESS }
-    ((elec_prefs[s, c, n, h] + s / numStudents) * interest_rates[h] * x[s, c, n])
+    ((elec_prefs[s, c, n, h] * interest_rates[h] + s / numStudents) * x[s, c, n])
 );
 
 # cannot get same class/section in both lists
