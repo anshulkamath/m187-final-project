@@ -24,7 +24,7 @@ var minHappiness;
 # objective function
 maximize Happiness: lambda * (
         sum { s in STUDENTS, c in CLASSES, n in SECTIONS[c], h in HAPPINESS }
-        (((elec_prefs[s, c, n, h] * interest_rates[h] + s / numStudents) * x[s, c, n])
+        ((elec_prefs[s, c, n, h] * interest_rates[h] + s / numStudents) * x[s, c, n])
     ) + (1 - lambda) * minHappiness;
 
 # minimum happiness for any student
